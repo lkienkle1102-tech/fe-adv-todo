@@ -1,7 +1,7 @@
 "use client"
 
+import { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -15,29 +15,23 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { getAuthErrorMessage } from "@/features/auth/error"
-import { useLogin } from "@/features/auth/hooks/use-login"
+import { loginAction, type FormState } from "@/features/auth/actions/login-action"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
 
 export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter()
   const { t } = useTranslation()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const login = useLogin()
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    login.mutate(
-      { email, password },
-      {
-        onSuccess: () => {
-          onSuccess?.()
-          router.push("/tasks")
-        },
+  const [state, formAction, isPending] = useActionState<FormState, FormData>(
+    async (prev, formData) => {
+      const result = await loginAction(prev, formData)
+      if (!result.error) {
+        onSuccess?.()
+        router.push("/tasks")
       }
-    )
-  }
+      return result
+    },
+    { error: null }
+  )
 
   return (
     <Card className="w-full max-w-sm">
@@ -45,37 +39,27 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
         <CardTitle>{t("auth.login.title")}</CardTitle>
         <CardDescription>{t("auth.login.description")}</CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="login-email">{t("common.email")}</Label>
-            <Input
-              id="login-email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <Input id="login-email" name="email" type="email" required autoComplete="email" />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="login-password">{t("common.password")}</Label>
             <Input
               id="login-password"
+              name="password"
               type="password"
               required
               autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          {login.isError && (
-            <p className="text-sm text-destructive">{getAuthErrorMessage(login.error)}</p>
-          )}
+          {state.error && <p className="text-sm text-destructive">{state.error}</p>}
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={login.isPending}>
-            {login.isPending ? t("auth.login.submitting") : t("auth.login.submit")}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? t("auth.login.submitting") : t("auth.login.submit")}
           </Button>
           <p className="text-sm text-muted-foreground">
             {t("auth.login.noAccount")}{" "}
