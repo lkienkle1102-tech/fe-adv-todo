@@ -1,8 +1,6 @@
 "use client"
 
 import { useActionState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { loginAction, type FormState } from "@/features/auth/actions/login-action"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
+import { Link, useRouter } from "@/features/i18n/navigation"
 
 export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter()

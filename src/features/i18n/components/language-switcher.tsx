@@ -1,6 +1,7 @@
 "use client"
 
 import { LanguagesIcon } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -9,11 +10,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { localeNames, type Locale } from "@/i18n/locales"
+import { localeNames, locales, type Locale } from "@/i18n/locales"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
 
+const LOCALE_PREFIX = new RegExp(`^/(${Object.keys(locales).join("|")})`)
+
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useTranslation()
+  const { locale } = useTranslation()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  function switchTo(code: Locale) {
+    const rest = pathname.replace(LOCALE_PREFIX, "")
+    router.push(`/${code}${rest}`)
+  }
 
   return (
     <DropdownMenu>
@@ -26,7 +36,7 @@ export function LanguageSwitcher() {
         {(Object.keys(localeNames) as Locale[]).map((code) => (
           <DropdownMenuItem
             key={code}
-            onSelect={() => setLocale(code)}
+            onSelect={() => switchTo(code)}
             className={code === locale ? "font-semibold" : undefined}
           >
             {localeNames[code]}

@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 
 import { makeQueryClient } from '../src/core/query-client'
+import '../src/app/globals.css'
 
 const preview: Preview = {
   decorators: [

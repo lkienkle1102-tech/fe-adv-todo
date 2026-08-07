@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect } from "react"
+import { useParams } from "next/navigation"
 
-import { locales } from "@/i18n/locales"
-import { useLocaleStore } from "@/features/i18n/store"
+import { locales, type Locale } from "@/i18n/locales"
 
 function getByPath(obj: unknown, path: string): unknown {
   return path.split(".").reduce<unknown>((acc, key) => {
@@ -15,17 +14,12 @@ function getByPath(obj: unknown, path: string): unknown {
 }
 
 export function useTranslation() {
-  const locale = useLocaleStore((s) => s.locale)
-  const setLocale = useLocaleStore((s) => s.setLocale)
-
-  useEffect(() => {
-    document.documentElement.lang = locale
-  }, [locale])
+  const { locale } = useParams<{ locale: Locale }>()
 
   function t(path: string): string {
     const value = getByPath(locales[locale], path)
     return typeof value === "string" ? value : path
   }
 
-  return { t, locale, setLocale }
+  return { t, locale }
 }
