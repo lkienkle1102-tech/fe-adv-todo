@@ -1,6 +1,17 @@
 import type { Preview } from '@storybook/nextjs-vite'
+import { QueryClientProvider } from '@tanstack/react-query'
+import React from 'react'
+
+import { makeQueryClient } from '../src/core/query-client'
 
 const preview: Preview = {
+  decorators: [
+    (Story) => (
+      <QueryClientProvider client={makeQueryClient()}>
+        <Story />
+      </QueryClientProvider>
+    ),
+  ],
   parameters: {
     controls: {
       matchers: {

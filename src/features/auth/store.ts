@@ -1,7 +1,9 @@
 import { create } from "zustand"
 
+import type { AuthUser } from "@/features/auth/api"
+
 type AuthState = {
-  user: { id: string; email: string } | null
+  user: AuthUser | null
   accessToken: string | null
   isAuthenticated: boolean
   setAuth: (user: AuthState["user"], accessToken: string) => void

@@ -16,24 +16,24 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getAuthErrorMessage } from "@/features/auth/error"
-import { useLogin } from "@/features/auth/hooks/use-login"
+import { useRegister } from "@/features/auth/hooks/use-register"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
 
-export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
+export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter()
   const { t } = useTranslation()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const login = useLogin()
+  const register = useRegister()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    login.mutate(
+    register.mutate(
       { email, password },
       {
         onSuccess: () => {
           onSuccess?.()
-          router.push("/tasks")
+          router.push("/login")
         },
       }
     )
@@ -42,15 +42,15 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>{t("auth.login.title")}</CardTitle>
-        <CardDescription>{t("auth.login.description")}</CardDescription>
+        <CardTitle>{t("auth.register.title")}</CardTitle>
+        <CardDescription>{t("auth.register.description")}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="login-email">{t("common.email")}</Label>
+            <Label htmlFor="register-email">{t("common.email")}</Label>
             <Input
-              id="login-email"
+              id="register-email"
               type="email"
               required
               autoComplete="email"
@@ -59,28 +59,29 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="login-password">{t("common.password")}</Label>
+            <Label htmlFor="register-password">{t("common.password")}</Label>
             <Input
-              id="login-password"
+              id="register-password"
               type="password"
               required
-              autoComplete="current-password"
+              minLength={8}
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          {login.isError && (
-            <p className="text-sm text-destructive">{getAuthErrorMessage(login.error)}</p>
+          {register.isError && (
+            <p className="text-sm text-destructive">{getAuthErrorMessage(register.error)}</p>
           )}
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={login.isPending}>
-            {login.isPending ? t("auth.login.submitting") : t("auth.login.submit")}
+          <Button type="submit" className="w-full" disabled={register.isPending}>
+            {register.isPending ? t("auth.register.submitting") : t("auth.register.submit")}
           </Button>
           <p className="text-sm text-muted-foreground">
-            {t("auth.login.noAccount")}{" "}
-            <Link href="/register" className="underline">
-              {t("auth.login.registerLink")}
+            {t("auth.register.hasAccount")}{" "}
+            <Link href="/login" className="underline">
+              {t("auth.register.loginLink")}
             </Link>
           </p>
         </CardFooter>
