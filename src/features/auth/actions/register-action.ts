@@ -1,10 +1,10 @@
 "use client"
 
 import { register } from "@/features/auth/api"
-import { getAuthErrorMessage } from "@/features/auth/error"
+import { parseAuthError, type AuthFormState } from "@/features/auth/error"
 import { registerSchema } from "@/features/auth/schema"
 
-export type FormState = { error: string | null }
+export type FormState = AuthFormState
 
 export async function registerAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = registerSchema.safeParse({
@@ -12,12 +12,18 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     password: formData.get("password"),
   })
   if (!parsed.success) {
-    return { error: parsed.error.issues[0].message }
+    const field = parsed.error.issues[0].path[0]
+    return {
+      error: {
+        code: field === "email" ? "INVALID_EMAIL" : "PASSWORD_TOO_SHORT",
+        backendMessage: null,
+      },
+    }
   }
   try {
     await register(parsed.data.email, parsed.data.password)
     return { error: null }
   } catch (err) {
-    return { error: getAuthErrorMessage(err) }
+    return { error: parseAuthError(err) }
   }
 }

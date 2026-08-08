@@ -3,6 +3,7 @@ import { Roboto, Roboto_Mono } from "next/font/google";
 import "../globals.css";
 import { QueryProvider } from "@/core/providers/query-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
 import { LocaleSync } from "@/features/i18n/components/locale-sync";
 import { locales, type Locale } from "@/i18n/locales";
@@ -47,6 +48,7 @@ export default async function RootLayout({
             </div>
             {children}
             {modal}
+            <Toaster position="top-center" richColors closeButton />
           </TooltipProvider>
         </QueryProvider>
       </body>

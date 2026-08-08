@@ -2,6 +2,7 @@
 
 import { useActionState } from "react"
 import { ArrowRight, Check, LockKeyhole, Mail } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,23 +16,40 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { registerAction, type FormState } from "@/features/auth/actions/register-action"
+import { localizeAuthError } from "@/features/auth/error"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
 import { Link, useRouter } from "@/features/i18n/navigation"
 
-export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
+export function RegisterForm({
+  onSuccess,
+  successDestination = "/login",
+  closeOnSuccess = false,
+}: {
+  onSuccess?: () => void
+  successDestination?: string
+  closeOnSuccess?: boolean
+}) {
   const router = useRouter()
   const { t } = useTranslation()
   const [state, formAction, isPending] = useActionState<FormState, FormData>(
     async (prev, formData) => {
       const result = await registerAction(prev, formData)
-      if (!result.error) {
+      if (result.error) {
+        toast.error(localizeAuthError(result.error, t))
+      } else {
+        toast.success(t("auth.register.success"))
         onSuccess?.()
-        router.push("/login")
+        if (closeOnSuccess) {
+          router.back()
+        } else {
+          router.replace(successDestination)
+        }
       }
       return result
     },
     { error: null }
   )
+  const errorMessage = state.error ? localizeAuthError(state.error, t) : null
 
   return (
     <Card className="w-full max-w-md gap-0 overflow-hidden rounded-[1.75rem] border border-white/80 bg-white py-0 shadow-[0_28px_70px_rgba(30,43,94,0.18)] ring-0">
@@ -57,7 +75,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
           </CardDescription>
         </CardHeader>
       </div>
-      <form action={formAction}>
+      <form action={formAction} noValidate>
         <CardContent className="flex flex-col gap-5 px-6 pt-7 sm:px-8">
           <div className="flex flex-col gap-2.5">
             <Label htmlFor="register-email">{t("common.email")}</Label>
@@ -73,7 +91,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
                 type="email"
                 required
                 autoComplete="email"
-                aria-invalid={Boolean(state.error)}
+                aria-invalid={Boolean(errorMessage)}
               />
             </div>
           </div>
@@ -92,16 +110,16 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
                 required
                 minLength={8}
                 autoComplete="new-password"
-                aria-invalid={Boolean(state.error)}
+                aria-invalid={Boolean(errorMessage)}
               />
             </div>
           </div>
-          {state.error && (
+          {errorMessage && (
             <p
               role="alert"
               className="rounded-xl bg-destructive/8 px-3.5 py-3 text-sm leading-5 text-destructive"
             >
-              {state.error}
+              {errorMessage}
             </p>
           )}
         </CardContent>

@@ -1,11 +1,11 @@
 "use client"
 
 import { fetchCurrentUser, login } from "@/features/auth/api"
-import { getAuthErrorMessage } from "@/features/auth/error"
+import { parseAuthError, type AuthFormState } from "@/features/auth/error"
 import { loginSchema } from "@/features/auth/schema"
 import { useAuthStore } from "@/features/auth/store"
 
-export type FormState = { error: string | null }
+export type FormState = AuthFormState
 
 export async function loginAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = loginSchema.safeParse({
@@ -13,7 +13,13 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
     password: formData.get("password"),
   })
   if (!parsed.success) {
-    return { error: parsed.error.issues[0].message }
+    const field = parsed.error.issues[0].path[0]
+    return {
+      error: {
+        code: field === "email" ? "INVALID_EMAIL" : "PASSWORD_REQUIRED",
+        backendMessage: null,
+      },
+    }
   }
   try {
     const { access_token } = await login(parsed.data.email, parsed.data.password)
@@ -23,6 +29,6 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
     return { error: null }
   } catch (err) {
     useAuthStore.setState({ accessToken: null })
-    return { error: getAuthErrorMessage(err) }
+    return { error: parseAuthError(err) }
   }
 }
