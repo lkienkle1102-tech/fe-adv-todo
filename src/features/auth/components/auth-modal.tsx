@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { useRouter } from "@/features/i18n/navigation"
+import { useRouter } from "@/i18n/navigation"
 
 export function AuthModal({ children, title }: { children: React.ReactNode; title: string }) {
   const router = useRouter()

@@ -5,8 +5,10 @@ import { QueryProvider } from "@/core/providers/query-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { LanguageSwitcher } from "@/features/i18n/components/language-switcher";
+import { IntlProvider } from "@/features/i18n/components/intl-provider";
 import { LocaleSync } from "@/features/i18n/components/locale-sync";
 import { locales, type Locale } from "@/i18n/locales";
+import { routing } from "@/i18n/routing";
 
 const roboto = Roboto({
   variable: "--font-sans",
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export function generateStaticParams() {
-  return Object.keys(locales).map((locale) => ({ locale }));
+  return routing.locales.map((locale) => ({ locale }));
 }
 
 export default async function RootLayout({
@@ -40,17 +42,19 @@ export default async function RootLayout({
       className={`${roboto.variable} ${robotoMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <LocaleSync locale={locale as Locale} />
-        <QueryProvider>
-          <TooltipProvider>
-            <div className="fixed top-4 right-4 z-50">
-              <LanguageSwitcher />
-            </div>
-            {children}
-            {modal}
-            <Toaster position="top-center" richColors closeButton />
-          </TooltipProvider>
-        </QueryProvider>
+        <IntlProvider locale={locale} messages={locales[locale as Locale]}>
+          <LocaleSync locale={locale as Locale} />
+          <QueryProvider>
+            <TooltipProvider>
+              <div className="fixed top-4 right-4 z-50">
+                <LanguageSwitcher />
+              </div>
+              {children}
+              {modal}
+              <Toaster position="top-center" richColors closeButton />
+            </TooltipProvider>
+          </QueryProvider>
+        </IntlProvider>
       </body>
     </html>
   );

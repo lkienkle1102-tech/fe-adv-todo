@@ -1,16 +1,20 @@
 import type { Preview } from '@storybook/nextjs-vite'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { NextIntlClientProvider } from 'next-intl'
 import React from 'react'
 
 import { makeQueryClient } from '../src/core/query-client'
+import vi from '../src/i18n/locales/vi'
 import '../src/app/globals.css'
 
 const preview: Preview = {
   decorators: [
     (Story) => (
-      <QueryClientProvider client={makeQueryClient()}>
-        <Story />
-      </QueryClientProvider>
+      <NextIntlClientProvider locale="vi" messages={vi}>
+        <QueryClientProvider client={makeQueryClient()}>
+          <Story />
+        </QueryClientProvider>
+      </NextIntlClientProvider>
     ),
   ],
   parameters: {

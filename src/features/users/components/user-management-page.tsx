@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { UserMenu } from "@/features/auth/components/user-menu"
 import { useAuthStore } from "@/features/auth/store"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
-import { Link } from "@/features/i18n/navigation"
+import { Link } from "@/i18n/navigation"
 
 export function UserManagementPage() {
   const { t } = useTranslation()

@@ -17,7 +17,7 @@ import {
 import { fetchSessionUser, logoutSession } from "@/features/auth/session-api"
 import { useAuthStore } from "@/features/auth/store"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
-import { Link, useRouter } from "@/features/i18n/navigation"
+import { Link, useRouter } from "@/i18n/navigation"
 
 export function UserMenu({ email }: { email?: string }) {
   const router = useRouter()

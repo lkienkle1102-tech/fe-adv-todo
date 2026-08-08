@@ -1,7 +1,6 @@
 "use client"
 
 import { LanguagesIcon } from "lucide-react"
-import { usePathname, useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -10,10 +9,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { localeNames, locales, type Locale } from "@/i18n/locales"
+import { localeNames, type Locale } from "@/i18n/locales"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
-
-const LOCALE_PREFIX = new RegExp(`^/(${Object.keys(locales).join("|")})`)
+import { usePathname, useRouter } from "@/i18n/navigation"
 
 export function LanguageSwitcher() {
   const { locale } = useTranslation()
@@ -21,8 +19,7 @@ export function LanguageSwitcher() {
   const pathname = usePathname()
 
   function switchTo(code: Locale) {
-    const rest = pathname.replace(LOCALE_PREFIX, "")
-    router.push(`/${code}${rest}`)
+    router.replace(pathname, { locale: code })
   }
 
   return (

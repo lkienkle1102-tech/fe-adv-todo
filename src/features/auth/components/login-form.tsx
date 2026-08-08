@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label"
 import { loginAction, type FormState } from "@/features/auth/actions/login-action"
 import { localizeAuthError } from "@/features/auth/error"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
-import { Link, useRouter } from "@/features/i18n/navigation"
+import { Link, useRouter } from "@/i18n/navigation"
 
 export function LoginForm({
   onSuccess,

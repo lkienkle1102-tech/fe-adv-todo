@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams } from "next/navigation"
+import { useLocale } from "next-intl"
 
 import { locales, type Locale } from "@/i18n/locales"
 
@@ -14,7 +14,7 @@ function getByPath(obj: unknown, path: string): unknown {
 }
 
 export function useTranslation() {
-  const { locale } = useParams<{ locale: Locale }>()
+  const locale = useLocale() as Locale
 
   function t(path: string): string {
     const value = getByPath(locales[locale], path)

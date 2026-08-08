@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
-import { Link } from "@/features/i18n/navigation"
+import { Link } from "@/i18n/navigation"
 
 const FEATURES = [
   { icon: ListTodo, key: "organize" },
