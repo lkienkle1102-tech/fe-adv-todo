@@ -3,7 +3,7 @@
 import { fetchCurrentUser, login } from "@/features/auth/api"
 import { parseAuthError, type AuthFormState } from "@/features/auth/error"
 import { loginSchema } from "@/features/auth/schema"
-import { createSession } from "@/features/auth/session-api"
+import { createSession, logoutSession } from "@/features/auth/session-api"
 import { useAuthStore } from "@/features/auth/store"
 
 export type FormState = AuthFormState
@@ -24,13 +24,13 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   }
   try {
     const { access_token } = await login(parsed.data.email, parsed.data.password)
-    useAuthStore.setState({ accessToken: access_token })
-    const user = await fetchCurrentUser()
     await createSession(access_token)
-    useAuthStore.getState().setAuth(user, access_token)
+    const user = await fetchCurrentUser()
+    useAuthStore.getState().setAuth(user)
     return { error: null }
   } catch (err) {
-    useAuthStore.setState({ accessToken: null })
+    await logoutSession().catch(() => undefined)
+    useAuthStore.getState().clearAuth()
     return { error: parseAuthError(err) }
   }
 }

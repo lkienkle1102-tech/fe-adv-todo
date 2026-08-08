@@ -7,8 +7,43 @@ export type Task = {
   due_at: string | null
 }
 
-export async function listTasks(): Promise<Task[]> {
-  const { data } = await apiClient.get("/tasks")
+export type TaskStatusFilter = "all" | "active" | "done" | "upcoming"
+export type TaskSortBy = "title" | "due_at" | "status"
+export type SortDirection = "asc" | "desc"
+
+export type TaskQuery = {
+  page: number
+  pageSize: number
+  search: string
+  status: TaskStatusFilter
+  sortBy: TaskSortBy
+  sortDirection: SortDirection
+  dueFrom: string
+  dueTo: string
+}
+
+export type TaskPage = {
+  items: Task[]
+  total: number
+  page: number
+  page_size: number
+  total_pages: number
+}
+
+export async function listTasks(query: TaskQuery): Promise<TaskPage> {
+  const params = new URLSearchParams({
+    page: String(query.page),
+    page_size: String(query.pageSize),
+    status: query.status,
+    sort_by: query.sortBy,
+    sort_direction: query.sortDirection,
+  })
+  if (query.search) params.set("search", query.search)
+  if (query.dueFrom && query.dueTo) {
+    params.set("due_from", query.dueFrom)
+    params.set("due_to", query.dueTo)
+  }
+  const { data } = await apiClient.get(`/tasks?${params.toString()}`)
   return data
 }
 

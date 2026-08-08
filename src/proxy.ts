@@ -25,8 +25,24 @@ export function proxy(request: NextRequest) {
   }
 
   const hasSession = Boolean(request.cookies.get(SESSION_COOKIE_NAME)?.value)
+  const pathnameLocale = routing.locales.find(
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
+  )
+  const localizedPath = pathnameLocale
+    ? pathname.slice(pathnameLocale.length + 1) || "/"
+    : pathname
+  const isProtectedPath =
+    localizedPath === "/tasks" || localizedPath.startsWith("/tasks/") ||
+    localizedPath === "/users" || localizedPath.startsWith("/users/")
 
-  if (!hasSession) return NextResponse.next()
+  if (!hasSession) {
+    if (pathnameLocale && isProtectedPath) {
+      return NextResponse.redirect(
+        new URL(getPathname({ href: "/login", locale: pathnameLocale }), request.url)
+      )
+    }
+    return NextResponse.next()
+  }
 
   const homepageLocale = routing.locales.find((locale) => pathname === `/${locale}`)
   if (!homepageLocale) return NextResponse.next()

@@ -43,6 +43,7 @@ export const WithTasks: Story = {
 
     await expect(canvas.getByText("Review the launch checklist")).toBeVisible()
     await expect(canvas.getByText("Send the weekly progress note")).toBeVisible()
+    await expect(canvas.getByRole("link", { name: "Thêm công việc" })).toBeVisible()
     const scheduleTrigger = canvas.getByRole("button", {
       name: "Chỉnh sửa lịch: Review the launch checklist",
     })
@@ -63,11 +64,32 @@ export const WithTasks: Story = {
         (time) => new Date(`${today}T${time}`).getTime() > now.getTime()
       )
     ).toBe(true)
-    await expect(canvas.getByLabelText("Ngày đến hạn")).toHaveAttribute("min", today)
     await userEvent.keyboard("{Escape}")
     await expect(scheduleTrigger).toHaveAttribute("data-state", "closed")
-    await userEvent.click(canvas.getByRole("button", { name: "Đang làm" }))
-    await expect(canvas.getByText("Review the launch checklist")).toBeVisible()
-    await expect(canvas.queryByText("Send the weekly progress note")).not.toBeInTheDocument()
+    await expect(canvas.getByRole("button", { name: "Chưa tới hạn" })).toBeVisible()
+
+    const fromInput = canvas.getByLabelText("Đến hạn từ")
+    const toInput = canvas.getByLabelText("Đến hạn đến")
+    await fireEvent.change(fromInput, { target: { value: "2026-08-10T10:00" } })
+    await fireEvent.change(toInput, { target: { value: "2026-08-09T10:00" } })
+    await userEvent.click(canvas.getByRole("button", { name: "Áp dụng" }))
+    await expect(canvas.getByRole("alert")).toHaveTextContent(
+      "Thời điểm bắt đầu phải sớm hơn thời điểm kết thúc."
+    )
+  },
+}
+
+export const PaginatedWorkspace: Story = {
+  args: {
+    initialTotal: 23,
+    initialTasks: [
+      { id: "page-1", title: "First result on this page", is_done: false, due_at: null },
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByRole("navigation", { name: "Các trang công việc" })).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Trang 2" })).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Trang 3" })).toBeVisible()
   },
 }

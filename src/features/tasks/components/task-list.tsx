@@ -1,12 +1,11 @@
 "use client"
 
-import { useActionState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
+import { useEffect } from "react"
 import {
   AlertCircle,
   CalendarDays,
   Check,
-  CheckCircle2,
+  Files,
   ListChecks,
   Plus,
   Sparkles,
@@ -16,79 +15,67 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination"
 import { Spinner } from "@/components/ui/spinner"
 import { UserMenu } from "@/features/auth/components/user-menu"
 import { useAuthStore } from "@/features/auth/store"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
-import { createTask, type Task } from "@/features/tasks/api"
+import type { Task } from "@/features/tasks/api"
+import { TaskQueryControls } from "@/features/tasks/components/task-query-controls"
 import { TaskScheduleControl } from "@/features/tasks/components/task-schedule-control"
 import {
-  tasksQueryKey,
   useDeleteTask,
   useTasks,
   useUpdateTask,
 } from "@/features/tasks/hooks/use-tasks"
-import { taskSchema } from "@/features/tasks/schema"
-import { getTaskScheduleState } from "@/features/tasks/schedule"
-import { TaskScheduleFields } from "@/features/tasks/components/task-schedule-fields"
 import { useTasksStore } from "@/features/tasks/store"
+import { Link } from "@/i18n/navigation"
 
-type TaskFormState = { error: "required" | "tooLong" | "past" | "request" | null }
+const FILTERS = ["all", "active", "done", "upcoming"] as const
 
-const FILTERS = ["all", "active", "done"] as const
-
-export function TaskList({ initialTasks }: { initialTasks?: Task[] }) {
+export function TaskList({
+  initialTasks,
+  initialTotal,
+}: {
+  initialTasks?: Task[]
+  initialTotal?: number
+}) {
   const { t } = useTranslation()
   const username = useAuthStore((state) => state.user?.username)
-  const filter = useTasksStore((state) => state.filter)
-  const setFilter = useTasksStore((state) => state.setFilter)
-  const queryClient = useQueryClient()
-  const tasksQuery = useTasks(initialTasks)
+  const query = useTasksStore((state) => state.query)
+  const setStatus = useTasksStore((state) => state.setStatus)
+  const setPage = useTasksStore((state) => state.setPage)
+  const initialPage = initialTasks
+    ? {
+        items: initialTasks,
+        total: initialTotal ?? initialTasks.length,
+        page: 1,
+        page_size: query.pageSize,
+        total_pages: Math.ceil((initialTotal ?? initialTasks.length) / query.pageSize),
+      }
+    : undefined
+  const tasksQuery = useTasks(query, initialPage)
   const updateMutation = useUpdateTask()
   const deleteMutation = useDeleteTask()
 
-  const [formState, formAction, isCreating] = useActionState<TaskFormState, FormData>(
-    async (_previous, formData) => {
-      const parsed = taskSchema.safeParse({
-        title: formData.get("title"),
-        dueAt: formData.get("dueAt"),
-      })
-      if (!parsed.success) {
-        const issue = parsed.error.issues[0]
-        if (issue.message === "PAST_SCHEDULE") return { error: "past" }
-        return { error: issue.code === "too_big" ? "tooLong" : "required" }
-      }
-      try {
-        const dueAt = parsed.data.dueAt
-          ? new Date(parsed.data.dueAt).toISOString()
-          : null
-        await createTask(parsed.data.title, dueAt)
-        await queryClient.invalidateQueries({ queryKey: tasksQueryKey })
-        return { error: null }
-      } catch {
-        return { error: "request" }
-      }
-    },
-    { error: null }
-  )
-
-  const tasks = tasksQuery.data ?? []
-  const completed = tasks.filter((task) => task.is_done).length
-  const dueToday = tasks.filter(
-    (task) => !task.is_done && getTaskScheduleState(task.due_at) === "today"
-  ).length
-  const visibleTasks = tasks.filter((task) => {
-    if (filter === "active") return !task.is_done
-    if (filter === "done") return task.is_done
-    return true
-  })
+  const pageData = tasksQuery.data
+  const tasks = pageData?.items ?? []
   const mutationFailed = updateMutation.isError || deleteMutation.isError
 
+  useEffect(() => {
+    if (pageData && pageData.total_pages > 0 && query.page > pageData.total_pages) {
+      setPage(pageData.total_pages)
+    }
+  }, [pageData, query.page, setPage])
+
   const stats = [
-    { key: "total", value: tasks.length, icon: ListChecks },
-    { key: "completed", value: completed, icon: CheckCircle2 },
-    { key: "dueToday", value: dueToday, icon: CalendarDays },
+    { key: "total", value: pageData?.total ?? 0, icon: ListChecks },
+    { key: "currentPage", value: pageData?.page ?? query.page, icon: Files },
+    { key: "totalPages", value: pageData?.total_pages ?? 0, icon: CalendarDays },
   ] as const
 
   return (
@@ -141,51 +128,36 @@ export function TaskList({ initialTasks }: { initialTasks?: Task[] }) {
         </section>
 
         <section className="relative mt-10 rounded-[2rem] border border-[#dfe4f1] bg-white p-6 shadow-[0_18px_50px_rgba(40,54,113,0.08)] sm:p-8">
-          <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
               <h2 className="text-2xl font-black tracking-[-0.035em] sm:text-3xl">{t("dashboard.taskTitle")}</h2>
               <p className="mt-1 text-sm text-[#7a8397]">{t("dashboard.taskDescription")}</p>
             </div>
-            <form action={formAction} noValidate className="grid w-full max-w-3xl gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(18rem,auto)_auto]">
-              <Input
-                name="title"
-                aria-label={t("dashboard.addPlaceholder")}
-                aria-invalid={Boolean(formState.error)}
-                placeholder={t("dashboard.addPlaceholder")}
-                maxLength={200}
-                disabled={isCreating}
-                className="h-11 rounded-xl border-[#dfe4ef] bg-[#f8f9fc] px-4"
-              />
-              <TaskScheduleFields idPrefix="new-task-due" disabled={isCreating} />
-              <Button type="submit" disabled={isCreating} className="h-11 shrink-0 rounded-xl bg-[#3146c8] px-4 text-white hover:bg-[#2639ad]">
-                {isCreating ? <Spinner /> : <Plus className="size-4" />}
-                <span className="hidden sm:inline">{isCreating ? t("dashboard.adding") : t("dashboard.newTask")}</span>
-              </Button>
-            </form>
+            <Button asChild className="h-11 shrink-0 rounded-xl bg-[#3146c8] px-5 text-white hover:bg-[#2639ad]">
+              <Link href="/tasks/create">
+                <Plus className="size-4" />
+                {t("dashboard.newTask")}
+              </Link>
+            </Button>
           </div>
-
-          {formState.error && (
-            <p role="alert" className="mt-3 flex items-center gap-2 text-sm text-destructive lg:justify-end">
-              <AlertCircle className="size-4" />
-              {t(`dashboard.formError.${formState.error}`)}
-            </p>
-          )}
 
           <div className="mt-8 flex flex-wrap gap-2" aria-label={t("dashboard.filterLabel")}>
             {FILTERS.map((value) => (
               <Button
                 key={value}
                 type="button"
-                variant={filter === value ? "default" : "outline"}
+                variant={query.status === value ? "default" : "outline"}
                 size="sm"
-                aria-pressed={filter === value}
-                onClick={() => setFilter(value)}
-                className={filter === value ? "bg-[#18213a] text-white hover:bg-[#26304b]" : "border-[#dfe4ef]"}
+                aria-pressed={query.status === value}
+                onClick={() => setStatus(value)}
+                className={query.status === value ? "bg-[#18213a] text-white hover:bg-[#26304b]" : "border-[#dfe4ef]"}
               >
                 {t(`dashboard.filter.${value}`)}
               </Button>
             ))}
           </div>
+
+          <TaskQueryControls query={query} />
 
           {mutationFailed && (
             <p role="alert" className="mt-5 rounded-xl bg-destructive/8 px-4 py-3 text-sm text-destructive">
@@ -203,15 +175,15 @@ export function TaskList({ initialTasks }: { initialTasks?: Task[] }) {
               <p className="mt-3 font-bold">{t("dashboard.loadError")}</p>
               <Button variant="outline" className="mt-4" onClick={() => tasksQuery.refetch()}>{t("dashboard.retry")}</Button>
             </div>
-          ) : visibleTasks.length === 0 ? (
+          ) : tasks.length === 0 ? (
             <div className="flex min-h-64 flex-col items-center justify-center text-center">
               <span className="grid size-14 place-items-center rounded-2xl bg-[#eef1ff] text-[#3146c8]"><ListChecks className="size-6" /></span>
-              <h3 className="mt-5 text-xl font-black tracking-[-0.025em]">{t(filter === "all" ? "dashboard.emptyTitle" : "dashboard.filterEmpty")}</h3>
+              <h3 className="mt-5 text-xl font-black tracking-[-0.025em]">{t(query.status === "all" && !query.search && !query.dueFrom ? "dashboard.emptyTitle" : "dashboard.filterEmpty")}</h3>
               <p className="mt-2 max-w-lg text-sm leading-6 text-[#727c91]">{t("dashboard.emptyDescription")}</p>
             </div>
           ) : (
             <ul className="mt-6 divide-y divide-[#e8ebf3]" aria-live="polite">
-              {visibleTasks.map((task) => (
+              {tasks.map((task) => (
                 <li key={task.id} className="group flex items-center gap-4 py-4 first:pt-2">
                   <Checkbox
                     checked={task.is_done}
@@ -240,6 +212,54 @@ export function TaskList({ initialTasks }: { initialTasks?: Task[] }) {
                 </li>
               ))}
             </ul>
+          )}
+
+          {pageData && pageData.total_pages > 1 && (
+            <div className="mt-6 border-t border-[#e8ebf3] pt-5">
+              <Pagination aria-label={t("dashboard.pagination.label")}>
+                <PaginationContent>
+                  <PaginationItem>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={query.page <= 1}
+                      onClick={() => setPage(query.page - 1)}
+                    >
+                      {t("dashboard.pagination.previous")}
+                    </Button>
+                  </PaginationItem>
+                  {Array.from({ length: pageData.total_pages }, (_, index) => index + 1)
+                    .filter((page) => page === 1 || page === pageData.total_pages || Math.abs(page - query.page) <= 1)
+                    .map((page, index, pages) => (
+                      <PaginationItem key={page} className="flex items-center">
+                        {index > 0 && page - pages[index - 1] > 1 && <span className="px-2 text-[#8b94a8]">…</span>}
+                        <Button
+                          type="button"
+                          variant={page === query.page ? "outline" : "ghost"}
+                          size="icon-sm"
+                          aria-current={page === query.page ? "page" : undefined}
+                          aria-label={`${t("dashboard.pagination.page")} ${page}`}
+                          onClick={() => setPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      </PaginationItem>
+                    ))}
+                  <PaginationItem>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={query.page >= pageData.total_pages}
+                      onClick={() => setPage(query.page + 1)}
+                    >
+                      {t("dashboard.pagination.next")}
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           )}
         </section>
       </main>

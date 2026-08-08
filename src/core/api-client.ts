@@ -1,19 +1,27 @@
-import xior from "xior"
+import xior, { type XiorError } from "xior"
 
-import { useAuthStore } from "@/features/auth/store"
+import { AUTH_UNAUTHORIZED_EVENT } from "@/features/auth/session-events"
 import { useLocaleStore } from "@/features/i18n/store"
 
 export const apiClient = xior.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000",
+  baseURL: "/api/backend",
 })
 
 apiClient.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().accessToken
   const locale = useLocaleStore.getState().locale
   config.headers = {
     ...config.headers,
     "Accept-Language": locale,
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
   return config
 })
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: XiorError) => {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT))
+    }
+    return Promise.reject(error)
+  }
+)
