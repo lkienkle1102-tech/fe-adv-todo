@@ -19,6 +19,7 @@ export function TaskScheduleFields({
   disabled = false,
   invalid = false,
   showLabels = false,
+  preserveInitialTime = false,
   className,
 }: {
   idPrefix: string
@@ -26,6 +27,7 @@ export function TaskScheduleFields({
   disabled?: boolean
   invalid?: boolean
   showLabels?: boolean
+  preserveInitialTime?: boolean
   className?: string
 }) {
   const { t } = useTranslation()
@@ -41,7 +43,8 @@ export function TaskScheduleFields({
     dateValue === initialDate &&
     initialTime &&
     !generatedOptions.includes(initialTime) &&
-    new Date(`${initialDate}T${initialTime}`).getTime() > now.getTime()
+    (preserveInitialTime ||
+      new Date(`${initialDate}T${initialTime}`).getTime() > now.getTime())
       ? [...generatedOptions, initialTime].sort()
       : generatedOptions
 

@@ -4,13 +4,24 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import {
   deleteTask,
+  getTask,
   listTasks,
+  type Task,
   type TaskPage,
   type TaskQuery,
   updateTask,
 } from "@/features/tasks/api"
 
 export const tasksQueryKey = ["tasks"] as const
+
+export function useTask(id: string, initialData?: Task) {
+  return useQuery({
+    queryKey: [...tasksQueryKey, id],
+    queryFn: () => getTask(id),
+    initialData,
+    enabled: Boolean(id) && initialData === undefined,
+  })
+}
 
 export function useTasks(query: TaskQuery, initialData?: TaskPage) {
   return useQuery({

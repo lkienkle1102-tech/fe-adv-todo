@@ -52,6 +52,11 @@ export async function createTask(title: string, dueAt: string | null): Promise<T
   return data
 }
 
+export async function getTask(id: string): Promise<Task> {
+  const { data } = await apiClient.get(`/tasks/${id}`)
+  return data
+}
+
 export async function updateTask(id: string, isDone: boolean): Promise<Task> {
   const { data } = await apiClient.patch(`/tasks/${id}`, { is_done: isDone })
   return data
@@ -59,6 +64,17 @@ export async function updateTask(id: string, isDone: boolean): Promise<Task> {
 
 export async function updateTaskSchedule(id: string, dueAt: string | null): Promise<Task> {
   const { data } = await apiClient.patch(`/tasks/${id}`, { due_at: dueAt })
+  return data
+}
+
+export async function updateTaskDetails(
+  id: string,
+  title: string,
+  dueAt?: string | null
+): Promise<Task> {
+  const payload: { title: string; due_at?: string | null } = { title }
+  if (dueAt !== undefined) payload.due_at = dueAt
+  const { data } = await apiClient.patch(`/tasks/${id}`, payload)
   return data
 }
 

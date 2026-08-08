@@ -7,6 +7,7 @@ import {
   Check,
   Files,
   ListChecks,
+  Pencil,
   Plus,
   Sparkles,
   Trash2,
@@ -198,17 +199,32 @@ export function TaskList({
                     </p>
                     <TaskScheduleControl task={task} />
                   </div>
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="ghost"
-                    disabled={deleteMutation.isPending}
-                    aria-label={`${t("dashboard.deleteTask")}: ${task.title}`}
-                    onClick={() => deleteMutation.mutate(task.id)}
-                    className="text-[#8b94a8] hover:bg-red-50 hover:text-red-600"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button
+                      asChild
+                      size="icon-sm"
+                      variant="ghost"
+                      className="text-[#8b94a8] hover:bg-[#eef1ff] hover:text-[#3146c8]"
+                    >
+                      <Link
+                        href={`/tasks/edit?taskId=${encodeURIComponent(task.id)}`}
+                        aria-label={`${t("dashboard.editTask")}: ${task.title}`}
+                      >
+                        <Pencil className="size-4" />
+                      </Link>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon-sm"
+                      variant="ghost"
+                      disabled={deleteMutation.isPending}
+                      aria-label={`${t("dashboard.deleteTask")}: ${task.title}`}
+                      onClick={() => deleteMutation.mutate(task.id)}
+                      className="text-[#8b94a8] hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>

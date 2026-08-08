@@ -86,9 +86,27 @@ const en = {
     create: {
       title: "Add a task",
       description: "Capture the task and choose an optional due time.",
-      name: "Task name",
       back: "Back to tasks",
       success: "Task added.",
+    },
+    edit: {
+      title: "Edit task",
+      description: "Update the task name and due time.",
+      save: "Save changes",
+      saving: "Saving...",
+      back: "Back to tasks",
+      success: "Task updated.",
+      loadError: "This task could not be loaded.",
+    },
+    taskForm: {
+      name: "Task name",
+      error: {
+        required: "Enter a task name.",
+        tooLong: "Keep the task name to 200 characters or fewer.",
+        past: "Choose a due time in the future.",
+        createRequest: "The task could not be added. Try again.",
+        updateRequest: "The task could not be updated. Try again.",
+      },
     },
     filterLabel: "Filter tasks",
     filter: {
@@ -130,13 +148,8 @@ const en = {
     retry: "Try again",
     actionError: "That change could not be saved. Try again.",
     toggleTask: "Change completion status",
+    editTask: "Edit task",
     deleteTask: "Delete task",
-    formError: {
-      required: "Enter a task before adding it.",
-      tooLong: "Keep the task under 200 characters.",
-      past: "Choose a due time in the future.",
-      request: "The task could not be added. Try again.",
-    },
     schedule: {
       title: "Schedule task",
       dueAt: "Due date and time",

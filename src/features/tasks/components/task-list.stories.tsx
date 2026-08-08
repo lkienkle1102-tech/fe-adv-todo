@@ -44,6 +44,9 @@ export const WithTasks: Story = {
     await expect(canvas.getByText("Review the launch checklist")).toBeVisible()
     await expect(canvas.getByText("Send the weekly progress note")).toBeVisible()
     await expect(canvas.getByRole("link", { name: "Thêm công việc" })).toBeVisible()
+    await expect(
+      canvas.getByRole("link", { name: "Chỉnh sửa công việc: Review the launch checklist" })
+    ).toHaveAttribute("href", "/vi/tasks/edit?taskId=1")
     const scheduleTrigger = canvas.getByRole("button", {
       name: "Chỉnh sửa lịch: Review the launch checklist",
     })

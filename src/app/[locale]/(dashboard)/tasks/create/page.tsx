@@ -1,5 +1,5 @@
-import { CreateTaskPage } from "@/features/tasks/components/create-task-page"
+import { TaskPage } from "@/features/tasks/components/task-page"
 
 export default function CreateTaskRoute() {
-  return <CreateTaskPage />
+  return <TaskPage mode="create" />
 }

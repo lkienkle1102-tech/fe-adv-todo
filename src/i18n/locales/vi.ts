@@ -88,9 +88,27 @@ const vi: typeof en = {
     create: {
       title: "Thêm công việc",
       description: "Nhập công việc và chọn thời hạn nếu cần.",
-      name: "Tên công việc",
       back: "Quay lại danh sách",
       success: "Đã thêm công việc.",
+    },
+    edit: {
+      title: "Chỉnh sửa công việc",
+      description: "Cập nhật tên và thời hạn của công việc.",
+      save: "Lưu thay đổi",
+      saving: "Đang lưu...",
+      back: "Quay lại danh sách",
+      success: "Đã cập nhật công việc.",
+      loadError: "Không thể tải công việc này.",
+    },
+    taskForm: {
+      name: "Tên công việc",
+      error: {
+        required: "Vui lòng nhập tên công việc.",
+        tooLong: "Tên công việc không được vượt quá 200 ký tự.",
+        past: "Chọn thời hạn ở tương lai.",
+        createRequest: "Không thể thêm công việc. Vui lòng thử lại.",
+        updateRequest: "Không thể cập nhật công việc. Vui lòng thử lại.",
+      },
     },
     filterLabel: "Lọc công việc",
     filter: {
@@ -132,13 +150,8 @@ const vi: typeof en = {
     retry: "Thử lại",
     actionError: "Không thể lưu thay đổi. Vui lòng thử lại.",
     toggleTask: "Đổi trạng thái hoàn thành",
+    editTask: "Chỉnh sửa công việc",
     deleteTask: "Xóa công việc",
-    formError: {
-      required: "Nhập nội dung công việc trước khi thêm.",
-      tooLong: "Nội dung công việc không được quá 200 ký tự.",
-      past: "Chọn thời hạn ở tương lai.",
-      request: "Không thể thêm công việc. Vui lòng thử lại.",
-    },
     schedule: {
       title: "Lên lịch công việc",
       dueAt: "Ngày và giờ đến hạn",

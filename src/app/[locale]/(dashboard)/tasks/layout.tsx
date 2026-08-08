@@ -2,15 +2,15 @@ import type { ReactNode } from "react"
 
 export default function TasksLayout({
   children,
-  modal,
+  taskModal,
 }: {
   children: ReactNode
-  modal: ReactNode
+  taskModal: ReactNode
 }) {
   return (
     <>
       {children}
-      {modal}
+      {taskModal}
     </>
   )
 }
