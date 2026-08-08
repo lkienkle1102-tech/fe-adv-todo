@@ -133,8 +133,8 @@ const vi: typeof en = {
       pageSize: "Mỗi trang",
       reset: "Đặt lại",
       apply: "Áp dụng",
+      applying: "Đang tải ...",
       error: {
-        rangeRequired: "Chọn đủ cả thời điểm bắt đầu và kết thúc.",
         rangeOrder: "Thời điểm bắt đầu phải sớm hơn thời điểm kết thúc.",
         invalid: "Kiểm tra lại nội dung tìm kiếm và bộ lọc.",
       },

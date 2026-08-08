@@ -1,22 +1,25 @@
 "use client"
 
 import { useActionState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { RotateCcw, Search, SlidersHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
-import type { TaskQuery } from "@/features/tasks/api"
+import { listTasks, type TaskQuery } from "@/features/tasks/api"
+import { tasksQueryKey } from "@/features/tasks/hooks/use-tasks"
 import { taskFilterSchema } from "@/features/tasks/schema"
 import { toDateTimeLocal } from "@/features/tasks/schedule"
 import { useTasksStore } from "@/features/tasks/store"
 
 type FilterFormState = {
-  error: "rangeRequired" | "rangeOrder" | "invalid" | null
+  error: "rangeOrder" | "invalid" | null
 }
 
 export function TaskQueryControls({ query }: { query: TaskQuery }) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const applyFilters = useTasksStore((state) => state.applyFilters)
   const resetFilters = useTasksStore((state) => state.resetFilters)
   const [state, formAction, pending] = useActionState<FilterFormState, FormData>(
@@ -31,17 +34,24 @@ export function TaskQueryControls({ query }: { query: TaskQuery }) {
       })
       if (!parsed.success) {
         const message = parsed.error.issues[0]?.message
-        if (message === "RANGE_REQUIRED") return { error: "rangeRequired" }
         if (message === "RANGE_ORDER") return { error: "rangeOrder" }
         return { error: "invalid" }
       }
-      applyFilters({
+      const filters = {
         ...parsed.data,
         dueFrom: parsed.data.dueFrom
           ? new Date(parsed.data.dueFrom).toISOString()
           : "",
         dueTo: parsed.data.dueTo ? new Date(parsed.data.dueTo).toISOString() : "",
-      })
+      }
+      const nextQuery = { ...query, ...filters, page: 1 }
+      applyFilters(filters)
+      await queryClient
+        .fetchQuery({
+          queryKey: [...tasksQueryKey, nextQuery],
+          queryFn: () => listTasks(nextQuery),
+        })
+        .catch(() => undefined)
       return { error: null }
     },
     { error: null }
@@ -52,6 +62,7 @@ export function TaskQueryControls({ query }: { query: TaskQuery }) {
       key={`${query.search}:${query.dueFrom}:${query.dueTo}:${query.sortBy}:${query.sortDirection}:${query.pageSize}`}
       action={formAction}
       noValidate
+      aria-busy={pending}
       className="mt-5 rounded-2xl border border-[#e3e7f2] bg-[#f8f9fc] p-4"
     >
       <div className="mb-3 flex items-center gap-2 text-sm font-bold text-[#35405a]">
@@ -119,8 +130,9 @@ export function TaskQueryControls({ query }: { query: TaskQuery }) {
           <Button type="button" variant="ghost" size="sm" onClick={resetFilters}>
             <RotateCcw className="size-4" />{t("dashboard.query.reset")}
           </Button>
-          <Button type="submit" size="sm" disabled={pending} className="bg-[#3146c8] text-white hover:bg-[#2639ad]">
-            <Search className="size-4" />{t("dashboard.query.apply")}
+          <Button type="submit" size="sm" disabled={pending} className="bg-[#3146c8] text-white hover:bg-[#2639ad] disabled:opacity-100">
+            <Search className="size-4" />
+            {t(pending ? "dashboard.query.applying" : "dashboard.query.apply")}
           </Button>
         </div>
       </div>

@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite"
-import { expect, fireEvent, userEvent, within } from "storybook/test"
+import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test"
 
 import { TaskList } from "@/features/tasks/components/task-list"
 import { toDateTimeLocal } from "@/features/tasks/schedule"
+import { useTasksStore } from "@/features/tasks/store"
 
 const meta: Meta<typeof TaskList> = {
   title: "features/tasks/TaskList",
@@ -71,14 +72,40 @@ export const WithTasks: Story = {
     await expect(scheduleTrigger).toHaveAttribute("data-state", "closed")
     await expect(canvas.getByRole("button", { name: "Chưa tới hạn" })).toBeVisible()
 
-    const fromInput = canvas.getByLabelText("Đến hạn từ")
-    const toInput = canvas.getByLabelText("Đến hạn đến")
+    await userEvent.click(canvas.getByRole("button", { name: "Đặt lại" }))
+    let fromInput = canvas.getByLabelText("Đến hạn từ")
+    await fireEvent.change(fromInput, { target: { value: "2026-08-10T10:00" } })
+    await userEvent.click(canvas.getByRole("button", { name: "Áp dụng" }))
+    await waitFor(() => {
+      expect(useTasksStore.getState().query.dueFrom).toBe(
+        new Date("2026-08-10T10:00").toISOString()
+      )
+      expect(useTasksStore.getState().query.dueTo).toBe("")
+    })
+    await expect(canvas.queryByRole("alert")).not.toBeInTheDocument()
+
+    await userEvent.click(canvas.getByRole("button", { name: "Đặt lại" }))
+    let toInput = canvas.getByLabelText("Đến hạn đến")
+    await fireEvent.change(toInput, { target: { value: "2026-08-09T10:00" } })
+    await userEvent.click(canvas.getByRole("button", { name: "Áp dụng" }))
+    await waitFor(() => {
+      expect(useTasksStore.getState().query.dueFrom).toBe("")
+      expect(useTasksStore.getState().query.dueTo).toBe(
+        new Date("2026-08-09T10:00").toISOString()
+      )
+    })
+    await expect(canvas.queryByRole("alert")).not.toBeInTheDocument()
+
+    await userEvent.click(canvas.getByRole("button", { name: "Đặt lại" }))
+    fromInput = canvas.getByLabelText("Đến hạn từ")
+    toInput = canvas.getByLabelText("Đến hạn đến")
     await fireEvent.change(fromInput, { target: { value: "2026-08-10T10:00" } })
     await fireEvent.change(toInput, { target: { value: "2026-08-09T10:00" } })
     await userEvent.click(canvas.getByRole("button", { name: "Áp dụng" }))
     await expect(canvas.getByRole("alert")).toHaveTextContent(
       "Thời điểm bắt đầu phải sớm hơn thời điểm kết thúc."
     )
+    await userEvent.click(canvas.getByRole("button", { name: "Đặt lại" }))
   },
 }
 

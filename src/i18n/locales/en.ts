@@ -131,8 +131,8 @@ const en = {
       pageSize: "Per page",
       reset: "Reset",
       apply: "Apply",
+      applying: "Loading ...",
       error: {
-        rangeRequired: "Choose both the start and end of the time range.",
         rangeOrder: "The start time must be earlier than the end time.",
         invalid: "Check the search and filter values.",
       },

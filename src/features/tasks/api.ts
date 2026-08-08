@@ -39,10 +39,8 @@ export async function listTasks(query: TaskQuery): Promise<TaskPage> {
     sort_direction: query.sortDirection,
   })
   if (query.search) params.set("search", query.search)
-  if (query.dueFrom && query.dueTo) {
-    params.set("due_from", query.dueFrom)
-    params.set("due_to", query.dueTo)
-  }
+  if (query.dueFrom) params.set("due_from", query.dueFrom)
+  if (query.dueTo) params.set("due_to", query.dueTo)
   const { data } = await apiClient.get(`/tasks?${params.toString()}`)
   return data
 }

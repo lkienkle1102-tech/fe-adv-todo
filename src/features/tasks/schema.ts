@@ -30,17 +30,14 @@ export const taskFilterSchema = z
     pageSize: z.coerce.number().int().min(5).max(100),
   })
   .superRefine((value, context) => {
-    if (Boolean(value.dueFrom) !== Boolean(value.dueTo)) {
-      context.addIssue({ code: "custom", message: "RANGE_REQUIRED" })
-      return
-    }
-    if (!value.dueFrom || !value.dueTo) return
-
-    const from = new Date(value.dueFrom)
-    const to = new Date(value.dueTo)
-    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+    const from = value.dueFrom ? new Date(value.dueFrom) : null
+    const to = value.dueTo ? new Date(value.dueTo) : null
+    if (
+      (from && Number.isNaN(from.getTime())) ||
+      (to && Number.isNaN(to.getTime()))
+    ) {
       context.addIssue({ code: "custom", message: "INVALID_RANGE" })
-    } else if (from.getTime() >= to.getTime()) {
+    } else if (from && to && from.getTime() >= to.getTime()) {
       context.addIssue({ code: "custom", message: "RANGE_ORDER" })
     }
   })
