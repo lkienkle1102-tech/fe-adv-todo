@@ -5,7 +5,10 @@ import { LoginForm } from "@/features/auth/components/login-form"
 const meta: Meta<typeof LoginForm> = {
   title: "features/auth/LoginForm",
   component: LoginForm,
-  parameters: { layout: "centered" },
+  parameters: {
+    layout: "centered",
+    backgrounds: { default: "auth" },
+  },
 }
 
 export default meta

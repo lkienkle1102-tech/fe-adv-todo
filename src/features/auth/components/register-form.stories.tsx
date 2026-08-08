@@ -5,7 +5,10 @@ import { RegisterForm } from "@/features/auth/components/register-form"
 const meta: Meta<typeof RegisterForm> = {
   title: "features/auth/RegisterForm",
   component: RegisterForm,
-  parameters: { layout: "centered" },
+  parameters: {
+    layout: "centered",
+    backgrounds: { default: "auth" },
+  },
 }
 
 export default meta

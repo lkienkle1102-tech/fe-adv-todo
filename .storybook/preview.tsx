@@ -14,6 +14,12 @@ const preview: Preview = {
     ),
   ],
   parameters: {
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        segments: [['locale', 'vi']],
+      },
+    },
     controls: {
       matchers: {
        color: /(background|color)$/i,
