@@ -3,6 +3,7 @@ import { match } from "@formatjs/intl-localematcher"
 import Negotiator from "negotiator"
 
 import { locales as localeMap, defaultLocale } from "@/i18n/locales"
+import { SESSION_COOKIE_NAME } from "@/features/auth/session"
 
 const locales = Object.keys(localeMap)
 
@@ -14,16 +15,23 @@ function getLocale(request: NextRequest): string {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const hasLocale = locales.some(
-    (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`)
+  const pathnameLocale = locales.find(
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
   )
-  if (hasLocale) return
+  const hasSession = Boolean(request.cookies.get(SESSION_COOKIE_NAME)?.value)
+
+  if (pathnameLocale) {
+    if (hasSession && pathname === `/${pathnameLocale}`) {
+      return NextResponse.redirect(new URL(`/${pathnameLocale}/tasks`, request.url))
+    }
+    return
+  }
 
   const locale = getLocale(request)
-  request.nextUrl.pathname = `/${locale}${pathname}`
+  request.nextUrl.pathname = hasSession && pathname === "/" ? `/${locale}/tasks` : `/${locale}${pathname}`
   return NextResponse.redirect(request.nextUrl)
 }
 
 export const config = {
-  matcher: ["/((?!_next|favicon.ico).*)"],
+  matcher: ["/((?!api|_next|favicon.ico).*)"],
 }

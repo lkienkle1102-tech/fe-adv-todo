@@ -3,6 +3,7 @@
 import { fetchCurrentUser, login } from "@/features/auth/api"
 import { parseAuthError, type AuthFormState } from "@/features/auth/error"
 import { loginSchema } from "@/features/auth/schema"
+import { createSession } from "@/features/auth/session-api"
 import { useAuthStore } from "@/features/auth/store"
 
 export type FormState = AuthFormState
@@ -25,6 +26,7 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
     const { access_token } = await login(parsed.data.email, parsed.data.password)
     useAuthStore.setState({ accessToken: access_token })
     const user = await fetchCurrentUser()
+    await createSession(access_token)
     useAuthStore.getState().setAuth(user, access_token)
     return { error: null }
   } catch (err) {

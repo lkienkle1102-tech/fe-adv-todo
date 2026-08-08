@@ -82,6 +82,25 @@ const vi: typeof en = {
     },
     signedInAs: "Đang đăng nhập với",
   },
+  userMenu: {
+    open: "Mở menu tài khoản",
+    account: "Tài khoản của bạn",
+    signedIn: "Đang đăng nhập với",
+    manageUsers: "Quản lý người dùng",
+    logout: "Đăng xuất",
+    loggingOut: "Đang đăng xuất...",
+    logoutSuccess: "Bạn đã đăng xuất.",
+    logoutError: "Không thể đăng xuất. Vui lòng thử lại.",
+  },
+  users: {
+    back: "Quay lại dashboard",
+    eyebrow: "Quyền truy cập tài khoản",
+    title: "Quản lý người dùng",
+    description: "Kiểm tra tài khoản hiện đang kết nối với workspace này.",
+    currentAccount: "Tài khoản hiện tại",
+    sessionAccount: "Tài khoản đã xác thực",
+    placeholder: "Thông tin hồ sơ và quyền trong workspace sẽ được bổ sung tại đây sau.",
+  },
 }
 
 export default vi

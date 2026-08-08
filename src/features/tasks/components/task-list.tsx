@@ -7,12 +7,12 @@ import {
   CheckCircle2,
   CircleDot,
   ListChecks,
-  Plus,
   Sparkles,
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { UserMenu } from "@/features/auth/components/user-menu"
 import { useAuthStore } from "@/features/auth/store"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
 
@@ -36,24 +36,11 @@ export function TaskList() {
             <span className="grid size-10 place-items-center rounded-xl bg-[#3146c8] text-white shadow-[0_8px_24px_rgba(49,70,200,0.22)]">
               <Check className="size-5 stroke-[2.5]" />
             </span>
-            <div>
-              <p className="text-sm font-black tracking-[-0.02em]">
-                ADV<span className="text-[#5267e0]">.TODO</span>
-              </p>
-              {email && (
-                <p className="mt-0.5 max-w-44 truncate text-xs text-[#7a8397]">
-                  {t("dashboard.signedInAs")} {email}
-                </p>
-              )}
-            </div>
+            <p className="text-sm font-black tracking-[-0.02em]">
+              ADV<span className="text-[#5267e0]">.TODO</span>
+            </p>
           </div>
-          <Button
-            disabled
-            className="h-10 rounded-xl bg-[#3146c8] px-4 text-white opacity-60"
-          >
-            <Plus className="size-4" />
-            <span className="hidden sm:inline">{t("dashboard.newTask")}</span>
-          </Button>
+          <UserMenu email={email} />
         </div>
       </header>
 

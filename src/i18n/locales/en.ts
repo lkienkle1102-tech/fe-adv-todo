@@ -80,6 +80,25 @@ const en = {
     },
     signedInAs: "Signed in as",
   },
+  userMenu: {
+    open: "Open account menu",
+    account: "Your account",
+    signedIn: "Signed in as",
+    manageUsers: "Manage users",
+    logout: "Log out",
+    loggingOut: "Logging out...",
+    logoutSuccess: "You have been logged out.",
+    logoutError: "Unable to log out. Please try again.",
+  },
+  users: {
+    back: "Back to dashboard",
+    eyebrow: "Account access",
+    title: "User management",
+    description: "Review the account currently connected to this workspace.",
+    currentAccount: "Current account",
+    sessionAccount: "Authenticated account",
+    placeholder: "More profile and workspace permissions will be available here later.",
+  },
 }
 
 export default en
