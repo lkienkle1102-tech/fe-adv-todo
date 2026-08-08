@@ -25,7 +25,7 @@ export function UserManagementPage() {
               ADV<span className="text-[#5267e0]">.TODO</span>
             </span>
           </Link>
-          <UserMenu email={user?.email} />
+          <UserMenu username={user?.username} />
         </div>
       </header>
 
@@ -56,7 +56,7 @@ export function UserManagementPage() {
                 {t("users.currentAccount")}
               </p>
               <p className="mt-1 font-bold text-[#28324a]">
-                {user?.email ?? t("users.sessionAccount")}
+                {user?.username ?? t("users.sessionAccount")}
               </p>
             </div>
           </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useActionState } from "react"
-import { ArrowRight, Check, LockKeyhole, Mail } from "lucide-react"
+import { ArrowRight, Check, LockKeyhole, Mail, UserRound } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -77,6 +77,25 @@ export function RegisterForm({
       </div>
       <form action={formAction} noValidate>
         <CardContent className="flex flex-col gap-5 px-6 pt-7 sm:px-8">
+          <div className="flex flex-col gap-2.5">
+            <Label htmlFor="register-username">{t("common.username")}</Label>
+            <div className="relative">
+              <UserRound
+                aria-hidden
+                className="absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-[#8b94a8]"
+              />
+              <Input
+                className="h-12 rounded-xl border-[#dfe4ef] bg-[#f8f9fc] pl-11 text-base shadow-none focus-visible:bg-white md:text-sm"
+                id="register-username"
+                name="username"
+                type="text"
+                required
+                minLength={3}
+                autoComplete="name"
+                aria-invalid={Boolean(errorMessage)}
+              />
+            </div>
+          </div>
           <div className="flex flex-col gap-2.5">
             <Label htmlFor="register-email">{t("common.email")}</Label>
             <div className="relative">

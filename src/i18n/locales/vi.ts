@@ -4,6 +4,7 @@ const vi: typeof en = {
   common: {
     login: "Đăng nhập",
     register: "Đăng ký",
+    username: "Tên người dùng",
     email: "Email",
     password: "Mật khẩu",
   },
@@ -51,6 +52,10 @@ const vi: typeof en = {
       INVALID_EMAIL: "Vui lòng nhập địa chỉ email hợp lệ.",
       PASSWORD_REQUIRED: "Vui lòng nhập mật khẩu.",
       PASSWORD_TOO_SHORT: "Mật khẩu phải có ít nhất 8 ký tự.",
+      USERNAME_REQUIRED: "Vui lòng nhập tên người dùng.",
+      USERNAME_TOO_SHORT: "Tên người dùng phải có ít nhất 3 ký tự.",
+      USERNAME_TOO_LONG: "Tên người dùng không được vượt quá 50 ký tự.",
+      USERNAME_INVALID: "Tên người dùng chứa ký tự không được hỗ trợ.",
       LOGIN_BAD_CREDENTIALS: "Email hoặc mật khẩu không chính xác.",
       LOGIN_USER_NOT_VERIFIED: "Vui lòng xác minh email trước khi đăng nhập.",
       REGISTER_USER_ALREADY_EXISTS: "Email này đã được dùng để đăng ký tài khoản.",

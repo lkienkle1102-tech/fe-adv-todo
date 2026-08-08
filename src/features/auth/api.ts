@@ -2,6 +2,7 @@ import { apiClient } from "@/core/api-client"
 
 export type AuthUser = {
   id: string
+  username: string
   email: string
   is_active: boolean
   is_superuser: boolean
@@ -21,8 +22,12 @@ export async function login(email: string, password: string) {
   return data
 }
 
-export async function register(email: string, password: string) {
-  const { data } = await apiClient.post<AuthUser>("/auth/register", { email, password })
+export async function register(username: string, email: string, password: string) {
+  const { data } = await apiClient.post<AuthUser>("/auth/register", {
+    username,
+    email,
+    password,
+  })
   return data
 }
 

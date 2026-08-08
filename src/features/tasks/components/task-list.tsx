@@ -26,7 +26,7 @@ const GUIDE_STEPS = ["capture", "schedule", "finish"] as const
 
 export function TaskList() {
   const { t } = useTranslation()
-  const email = useAuthStore((state) => state.user?.email)
+  const username = useAuthStore((state) => state.user?.username)
 
   return (
     <div className="min-h-screen bg-[#f6f8ff] text-[#172033]">
@@ -40,7 +40,7 @@ export function TaskList() {
               ADV<span className="text-[#5267e0]">.TODO</span>
             </p>
           </div>
-          <UserMenu email={email} />
+          <UserMenu username={username} />
         </div>
       </header>
 

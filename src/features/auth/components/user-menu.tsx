@@ -19,27 +19,27 @@ import { useAuthStore } from "@/features/auth/store"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
 import { Link, useRouter } from "@/i18n/navigation"
 
-export function UserMenu({ email }: { email?: string }) {
+export function UserMenu({ username }: { username?: string }) {
   const router = useRouter()
   const { t } = useTranslation()
-  const [sessionEmail, setSessionEmail] = useState<string | null>(null)
+  const [sessionUsername, setSessionUsername] = useState<string | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const displayEmail = email ?? sessionEmail
+  const displayUsername = username ?? sessionUsername
 
   useEffect(() => {
-    if (email) return
+    if (username) return
 
     let isActive = true
     void fetchSessionUser()
       .then((user) => {
-        if (isActive) setSessionEmail(user?.email ?? null)
+        if (isActive) setSessionUsername(user?.username ?? null)
       })
       .catch(() => undefined)
 
     return () => {
       isActive = false
     }
-  }, [email])
+  }, [username])
 
   async function handleLogout() {
     if (isLoggingOut) return
@@ -55,7 +55,13 @@ export function UserMenu({ email }: { email?: string }) {
     }
   }
 
-  const initials = displayEmail?.slice(0, 2).toUpperCase() ?? "U"
+  const nameParts = displayUsername?.trim().split(/\s+/u) ?? []
+  const initials =
+    (nameParts.length > 1 ? [nameParts[0], nameParts.at(-1)] : nameParts)
+      .filter(Boolean)
+      .map((part) => Array.from(part ?? "")[0])
+      .join("")
+      .toLocaleUpperCase() || "U"
 
   return (
     <DropdownMenu>
@@ -71,7 +77,7 @@ export function UserMenu({ email }: { email?: string }) {
             </AvatarFallback>
           </Avatar>
           <span className="hidden min-w-0 max-w-40 truncate text-sm font-bold sm:block">
-            {displayEmail ?? t("userMenu.account")}
+            {displayUsername ?? t("userMenu.account")}
           </span>
           <ChevronDown className="size-3.5 text-[#8a93a8]" />
         </Button>
@@ -86,7 +92,7 @@ export function UserMenu({ email }: { email?: string }) {
             {t("userMenu.signedIn")}
           </span>
           <span className="mt-1 block truncate text-sm font-bold text-[#28324a]">
-            {displayEmail ?? t("userMenu.account")}
+            {displayUsername ?? t("userMenu.account")}
           </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-1.5" />

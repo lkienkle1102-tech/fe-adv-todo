@@ -7,7 +7,7 @@ const meta: Meta<typeof UserMenu> = {
   component: UserMenu,
   parameters: { layout: "centered" },
   tags: ["autodocs"],
-  args: { email: "yukalouno@example.com" },
+  args: { username: "Nguyễn Minh Anh" },
 }
 
 export default meta

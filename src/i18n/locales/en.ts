@@ -2,6 +2,7 @@ const en = {
   common: {
     login: "Log in",
     register: "Sign up",
+    username: "Username",
     email: "Email",
     password: "Password",
   },
@@ -49,6 +50,10 @@ const en = {
       INVALID_EMAIL: "Enter a valid email address.",
       PASSWORD_REQUIRED: "Enter your password.",
       PASSWORD_TOO_SHORT: "Use at least 8 characters for your password.",
+      USERNAME_REQUIRED: "Enter your username.",
+      USERNAME_TOO_SHORT: "Use at least 3 characters for your username.",
+      USERNAME_TOO_LONG: "Use no more than 50 characters for your username.",
+      USERNAME_INVALID: "The username contains unsupported characters.",
       LOGIN_BAD_CREDENTIALS: "The email or password is incorrect.",
       LOGIN_USER_NOT_VERIFIED: "Verify your email before logging in.",
       REGISTER_USER_ALREADY_EXISTS: "An account with this email already exists.",
