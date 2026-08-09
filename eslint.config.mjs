@@ -22,6 +22,19 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["**/*.stories.tsx"],
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        {
+          name: "fetch",
+          message: "Use a configured xior client from src/core instead of fetch().",
+        },
+      ],
+    },
+  },
+  {
     files: ["**/*.{js,mjs,cjs}"],
     rules: {
       "no-unused-vars": [

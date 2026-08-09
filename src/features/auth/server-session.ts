@@ -2,7 +2,7 @@ import "server-only"
 
 import { cookies } from "next/headers"
 
-import { BACKEND_URL } from "@/core/backend-url"
+import { backendClient } from "@/core/backend-client"
 import type { AuthUser } from "@/features/auth/api"
 import { SESSION_COOKIE_NAME } from "@/features/auth/session"
 
@@ -11,12 +11,12 @@ export async function getServerSessionUser(): Promise<AuthUser | null> {
   if (!token) return null
 
   try {
-    const response = await fetch(`${BACKEND_URL}/auth/users/me`, {
+    const response = await backendClient.get<AuthUser>("/auth/users/me", {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     })
-    if (!response.ok) return null
-    return response.json() as Promise<AuthUser>
+    if (response.status < 200 || response.status >= 300) return null
+    return response.data
   } catch {
     return null
   }

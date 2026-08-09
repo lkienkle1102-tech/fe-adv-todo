@@ -6,15 +6,21 @@ import { useLocaleStore } from "@/features/i18n/store"
 export const apiClient = xior.create({
   baseURL: "/api/backend",
 })
+export const sessionClient = xior.create()
 
-apiClient.interceptors.request.use((config) => {
-  const locale = useLocaleStore.getState().locale
-  config.headers = {
-    ...config.headers,
-    "Accept-Language": locale,
-  }
-  return config
-})
+function addLocaleHeader(client: ReturnType<typeof xior.create>) {
+  client.interceptors.request.use((config) => {
+    const locale = useLocaleStore.getState().locale
+    config.headers = {
+      ...config.headers,
+      "Accept-Language": locale,
+    }
+    return config
+  })
+}
+
+addLocaleHeader(apiClient)
+addLocaleHeader(sessionClient)
 
 apiClient.interceptors.response.use(
   (response) => response,

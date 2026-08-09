@@ -1,24 +1,22 @@
-import xior from "xior"
+import { isXiorError } from "xior"
 
+import { sessionClient } from "@/core/api-client"
 import type { AuthUser } from "@/features/auth/api"
-import { useLocaleStore } from "@/features/i18n/store"
 
 export async function createSession(email: string, password: string): Promise<void> {
-  await xior.post(
-    "/api/session",
-    { email, password },
-    { headers: { "Accept-Language": useLocaleStore.getState().locale } }
-  )
+  await sessionClient.post("/api/session", { email, password })
 }
 
 export async function fetchSessionUser(): Promise<AuthUser | null> {
-  const response = await fetch("/api/session", { cache: "no-store" })
-  if (response.status === 401) return null
-  if (!response.ok) throw new Error("Unable to load session")
-  return response.json() as Promise<AuthUser>
+  try {
+    const { data } = await sessionClient.get<AuthUser>("/api/session", { cache: "no-store" })
+    return data
+  } catch (error) {
+    if (isXiorError(error) && error.response?.status === 401) return null
+    throw error
+  }
 }
 
 export async function logoutSession(): Promise<void> {
-  const response = await fetch("/api/session", { method: "DELETE" })
-  if (!response.ok) throw new Error("Unable to log out")
+  await sessionClient.delete("/api/session")
 }

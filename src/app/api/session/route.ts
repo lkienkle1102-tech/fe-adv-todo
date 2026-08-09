@@ -1,8 +1,9 @@
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
+import type { XiorResponse } from "xior"
 import { z } from "zod"
 
-import { BACKEND_URL } from "@/core/backend-url"
+import { backendClient } from "@/core/backend-client"
 import { SESSION_COOKIE_NAME, SESSION_MAX_AGE_SECONDS } from "@/features/auth/session"
 
 const loginSchema = z.object({
@@ -29,16 +30,11 @@ export async function POST(request: NextRequest) {
     username: parsed.data.email,
     password: parsed.data.password,
   })
-  let backendResponse: Response
+  let backendResponse: XiorResponse<unknown>
 
   try {
-    backendResponse = await fetch(`${BACKEND_URL}/auth/jwt/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept-Language": request.headers.get("accept-language") ?? "vi",
-      },
-      body: form,
+    backendResponse = await backendClient.post<unknown>("/auth/jwt/login", form, {
+      headers: { "Accept-Language": request.headers.get("accept-language") ?? "vi" },
       cache: "no-store",
     })
   } catch {
@@ -48,15 +44,13 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  if (!backendResponse.ok) {
-    const contentType = backendResponse.headers.get("content-type")
-    return new NextResponse(backendResponse.body, {
+  if (backendResponse.status < 200 || backendResponse.status >= 300) {
+    return NextResponse.json(backendResponse.data, {
       status: backendResponse.status,
-      headers: contentType ? { "Content-Type": contentType } : undefined,
     })
   }
 
-  const token = tokenSchema.safeParse(await backendResponse.json().catch(() => null))
+  const token = tokenSchema.safeParse(backendResponse.data)
   if (!token.success) {
     return NextResponse.json(
       { code: "INVALID_AUTH_RESPONSE", message: "Authentication service returned an invalid response." },
@@ -81,7 +75,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ code: "UNAUTHORIZED" }, { status: 401 })
   }
 
-  const response = await fetch(`${BACKEND_URL}/auth/users/me`, {
+  const backendResponse = await backendClient.get("/auth/users/me", {
     headers: {
       Authorization: `Bearer ${token}`,
       "Accept-Language": request.headers.get("accept-language") ?? "vi",
@@ -89,13 +83,13 @@ export async function GET(request: NextRequest) {
     cache: "no-store",
   })
 
-  if (!response.ok) {
+  if (backendResponse.status < 200 || backendResponse.status >= 300) {
     const unauthorized = NextResponse.json({ code: "UNAUTHORIZED" }, { status: 401 })
     unauthorized.cookies.delete(SESSION_COOKIE_NAME)
     return unauthorized
   }
 
-  return NextResponse.json(await response.json())
+  return NextResponse.json(backendResponse.data)
 }
 
 export async function DELETE(request: NextRequest) {
@@ -103,8 +97,7 @@ export async function DELETE(request: NextRequest) {
 
   if (token) {
     try {
-      await fetch(`${BACKEND_URL}/auth/jwt/logout`, {
-        method: "POST",
+      await backendClient.post("/auth/jwt/logout", undefined, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Accept-Language": request.headers.get("accept-language") ?? "vi",
