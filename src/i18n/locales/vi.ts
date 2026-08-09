@@ -9,6 +9,10 @@ const vi: typeof en = {
     password: "Mật khẩu",
   },
   home: {
+    seo: {
+      title: "Advanced Todo | Quản lý công việc thông minh",
+      description: "Lập kế hoạch, sắp xếp và theo dõi công việc trong một không gian tập trung với Advanced Todo.",
+    },
     badge: "Quản lý công việc thông minh",
     title: "Advanced",
     titleHighlight: "Todo",

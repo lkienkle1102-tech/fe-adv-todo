@@ -7,6 +7,10 @@ const en = {
     password: "Password",
   },
   home: {
+    seo: {
+      title: "Advanced Todo | Smart Task Management",
+      description: "Plan, organize, and track your tasks in one focused workspace with Advanced Todo.",
+    },
     badge: "Smart task management",
     title: "Advanced",
     titleHighlight: "Todo",
