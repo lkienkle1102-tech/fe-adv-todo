@@ -1,6 +1,6 @@
 "use client"
 
-import { fetchCurrentUser, login } from "@/features/auth/api"
+import { fetchCurrentUser } from "@/features/auth/api"
 import { parseAuthError, type AuthFormState } from "@/features/auth/error"
 import { loginSchema } from "@/features/auth/schema"
 import { createSession, logoutSession } from "@/features/auth/session-api"
@@ -23,8 +23,7 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
     }
   }
   try {
-    const { access_token } = await login(parsed.data.email, parsed.data.password)
-    await createSession(access_token)
+    await createSession(parsed.data.email, parsed.data.password)
     const user = await fetchCurrentUser()
     useAuthStore.getState().setAuth(user)
     return { error: null }

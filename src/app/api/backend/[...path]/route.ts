@@ -1,9 +1,9 @@
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 
+import { BACKEND_URL } from "@/core/backend-url"
 import { SESSION_COOKIE_NAME } from "@/features/auth/session"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
 const METHODS_WITHOUT_BODY = new Set(["GET", "HEAD"])
 
 type RouteContext = { params: Promise<{ path: string[] }> }
@@ -19,7 +19,7 @@ async function forwardRequest(request: NextRequest, context: RouteContext) {
   if (token) headers.set("Authorization", `Bearer ${token}`)
 
   const backendResponse = await fetch(
-    `${API_URL}/${path.join("/")}${request.nextUrl.search}`,
+    `${BACKEND_URL}/${path.join("/")}${request.nextUrl.search}`,
     {
       method: request.method,
       headers,

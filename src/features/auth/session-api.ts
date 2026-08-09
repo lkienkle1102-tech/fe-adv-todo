@@ -1,13 +1,14 @@
+import xior from "xior"
+
 import type { AuthUser } from "@/features/auth/api"
+import { useLocaleStore } from "@/features/i18n/store"
 
-export async function createSession(accessToken: string): Promise<void> {
-  const response = await fetch("/api/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ accessToken }),
-  })
-
-  if (!response.ok) throw new Error("Unable to create session")
+export async function createSession(email: string, password: string): Promise<void> {
+  await xior.post(
+    "/api/session",
+    { email, password },
+    { headers: { "Accept-Language": useLocaleStore.getState().locale } }
+  )
 }
 
 export async function fetchSessionUser(): Promise<AuthUser | null> {

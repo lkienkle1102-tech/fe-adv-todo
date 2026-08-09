@@ -9,19 +9,6 @@ export type AuthUser = {
   is_verified: boolean
 }
 
-export type LoginResponse = {
-  access_token: string
-  token_type: string
-}
-
-export async function login(email: string, password: string) {
-  const form = new URLSearchParams({ username: email, password })
-  const { data } = await apiClient.post<LoginResponse>("/auth/jwt/login", form, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  })
-  return data
-}
-
 export async function register(username: string, email: string, password: string) {
   const { data } = await apiClient.post<AuthUser>("/auth/register", {
     username,

@@ -2,13 +2,22 @@ import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 
+import { BACKEND_URL } from "@/core/backend-url"
 import { SESSION_COOKIE_NAME, SESSION_MAX_AGE_SECONDS } from "@/features/auth/session"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
-const sessionSchema = z.object({ accessToken: z.string().min(1) })
+const loginSchema = z.object({
+  email: z.email(),
+  password: z.string().min(1),
+})
+const tokenSchema = z.object({ access_token: z.string().min(1) })
+
+function isSecureRequest(request: NextRequest): boolean {
+  const forwardedProtocol = request.headers.get("x-forwarded-proto")?.split(",")[0].trim()
+  return forwardedProtocol === "https" || request.nextUrl.protocol === "https:"
+}
 
 export async function POST(request: NextRequest) {
-  const parsed = sessionSchema.safeParse(await request.json().catch(() => null))
+  const parsed = loginSchema.safeParse(await request.json().catch(() => null))
   if (!parsed.success) {
     return NextResponse.json(
       { code: "VALIDATION_ERROR", message: "Invalid session payload." },
@@ -16,10 +25,49 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  const form = new URLSearchParams({
+    username: parsed.data.email,
+    password: parsed.data.password,
+  })
+  let backendResponse: Response
+
+  try {
+    backendResponse = await fetch(`${BACKEND_URL}/auth/jwt/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept-Language": request.headers.get("accept-language") ?? "vi",
+      },
+      body: form,
+      cache: "no-store",
+    })
+  } catch {
+    return NextResponse.json(
+      { code: "AUTH_SERVICE_UNAVAILABLE", message: "Authentication service unavailable." },
+      { status: 502 }
+    )
+  }
+
+  if (!backendResponse.ok) {
+    const contentType = backendResponse.headers.get("content-type")
+    return new NextResponse(backendResponse.body, {
+      status: backendResponse.status,
+      headers: contentType ? { "Content-Type": contentType } : undefined,
+    })
+  }
+
+  const token = tokenSchema.safeParse(await backendResponse.json().catch(() => null))
+  if (!token.success) {
+    return NextResponse.json(
+      { code: "INVALID_AUTH_RESPONSE", message: "Authentication service returned an invalid response." },
+      { status: 502 }
+    )
+  }
+
   const response = NextResponse.json({ success: true })
-  response.cookies.set(SESSION_COOKIE_NAME, parsed.data.accessToken, {
+  response.cookies.set(SESSION_COOKIE_NAME, token.data.access_token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecureRequest(request),
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_MAX_AGE_SECONDS,
@@ -33,7 +81,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ code: "UNAUTHORIZED" }, { status: 401 })
   }
 
-  const response = await fetch(`${API_URL}/auth/users/me`, {
+  const response = await fetch(`${BACKEND_URL}/auth/users/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Accept-Language": request.headers.get("accept-language") ?? "vi",
@@ -55,7 +103,7 @@ export async function DELETE(request: NextRequest) {
 
   if (token) {
     try {
-      await fetch(`${API_URL}/auth/jwt/logout`, {
+      await fetch(`${BACKEND_URL}/auth/jwt/logout`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
