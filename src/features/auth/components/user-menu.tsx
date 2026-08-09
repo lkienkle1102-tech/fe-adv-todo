@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ChevronDown, LogOut, Users } from "lucide-react"
+import { ChevronDown, LogOut, UserRound } from "lucide-react"
 import { toast } from "sonner"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -69,7 +69,7 @@ export function UserMenu({ username }: { username?: string }) {
         <Button
           variant="ghost"
           className="h-11 max-w-64 gap-2 rounded-xl border border-[#e0e5f2] bg-white px-2.5 text-[#28324a] shadow-sm hover:bg-[#f7f8ff] data-[state=open]:bg-[#eef1ff]"
-          aria-label={t("userMenu.open")}
+          aria-label={`${t("userMenu.open")}: ${displayUsername ?? t("userMenu.account")}`}
         >
           <Avatar size="sm" className="size-7">
             <AvatarFallback className="bg-[#3146c8] text-[10px] font-black text-white">
@@ -97,9 +97,9 @@ export function UserMenu({ username }: { username?: string }) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-1.5" />
         <DropdownMenuItem asChild className="rounded-xl px-3 py-2.5 font-medium">
-          <Link href="/users">
-            <Users className="size-4 text-[#5267e0]" />
-            {t("userMenu.manageUsers")}
+          <Link href="/user">
+            <UserRound className="size-4 text-[#5267e0]" />
+            {t("userMenu.profile")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem

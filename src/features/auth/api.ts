@@ -35,3 +35,23 @@ export async function fetchCurrentUser() {
   const { data } = await apiClient.get<AuthUser>("/auth/users/me")
   return data
 }
+
+export type UpdateCurrentUserInput = {
+  username?: string
+  email?: string
+}
+
+export async function updateCurrentUser(input: UpdateCurrentUserInput) {
+  const { data } = await apiClient.patch<AuthUser>("/auth/users/me", input)
+  return data
+}
+
+export async function changeCurrentUserPassword(
+  currentPassword: string,
+  newPassword: string
+) {
+  await apiClient.post("/auth/users/me/password", {
+    current_password: currentPassword,
+    new_password: newPassword,
+  })
+}
