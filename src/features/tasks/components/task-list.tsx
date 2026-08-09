@@ -3,9 +3,9 @@
 import { useEffect } from "react"
 import {
   AlertCircle,
-  CalendarDays,
   Check,
-  Files,
+  CircleCheck,
+  CircleDashed,
   ListChecks,
   Pencil,
   Plus,
@@ -22,6 +22,7 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination"
 import { Spinner } from "@/components/ui/spinner"
+import { Skeleton } from "@/components/ui/skeleton"
 import { UserMenu } from "@/features/auth/components/user-menu"
 import { useAuthStore } from "@/features/auth/store"
 import { useTranslation } from "@/features/i18n/hooks/use-translation"
@@ -57,6 +58,19 @@ export function TaskList({
         page: 1,
         page_size: query.pageSize,
         total_pages: Math.ceil((initialTotal ?? initialTasks.length) / query.pageSize),
+        summary: {
+          total: initialTotal ?? initialTasks.length,
+          completed: initialTasks.filter((task) => task.is_done).length,
+          incomplete: initialTasks.filter((task) => !task.is_done).length,
+        },
+        status_counts: {
+          all: initialTotal ?? initialTasks.length,
+          active: initialTasks.filter((task) => !task.is_done).length,
+          done: initialTasks.filter((task) => task.is_done).length,
+          upcoming: initialTasks.filter(
+            (task) => !task.is_done && task.due_at && new Date(task.due_at) > new Date()
+          ).length,
+        },
       }
     : undefined
   const tasksQuery = useTasks(query, initialPage)
@@ -66,6 +80,7 @@ export function TaskList({
   const pageData = tasksQuery.data
   const tasks = pageData?.items ?? []
   const mutationFailed = updateMutation.isError || deleteMutation.isError
+  const showCountSkeletons = pageData === undefined && tasksQuery.isFetching
 
   useEffect(() => {
     if (pageData && pageData.total_pages > 0 && query.page > pageData.total_pages) {
@@ -74,9 +89,9 @@ export function TaskList({
   }, [pageData, query.page, setPage])
 
   const stats = [
-    { key: "total", value: pageData?.total ?? 0, icon: ListChecks },
-    { key: "currentPage", value: pageData?.page ?? query.page, icon: Files },
-    { key: "totalPages", value: pageData?.total_pages ?? 0, icon: CalendarDays },
+    { key: "total", value: pageData?.summary.total, icon: ListChecks },
+    { key: "completed", value: pageData?.summary.completed, icon: CircleCheck },
+    { key: "incomplete", value: pageData?.summary.incomplete, icon: CircleDashed },
   ] as const
 
   return (
@@ -116,11 +131,18 @@ export function TaskList({
             <p className="text-xs font-bold tracking-[0.16em] text-white/55 uppercase">
               {t("dashboard.overview")}
             </p>
-            <div className="mt-7 grid grid-cols-3 divide-x divide-white/10">
+            <div
+              className="mt-7 grid grid-cols-3 divide-x divide-white/10"
+              aria-busy={showCountSkeletons}
+            >
               {stats.map(({ key, value, icon: Icon }) => (
                 <div key={key} className="px-3 first:pl-0 last:pr-0">
                   <Icon className="mb-4 size-4 text-[#77def7]" />
-                  <p className="font-mono text-3xl font-bold">{value}</p>
+                  {showCountSkeletons ? (
+                    <Skeleton className="h-9 w-12 bg-white/15" aria-hidden />
+                  ) : (
+                    <p className="font-mono text-3xl font-bold">{value ?? "—"}</p>
+                  )}
                   <p className="mt-1 text-xs leading-4 text-white/55">{t(`dashboard.${key}`)}</p>
                 </div>
               ))}
@@ -142,7 +164,11 @@ export function TaskList({
             </Button>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-2" aria-label={t("dashboard.filterLabel")}>
+          <div
+            className="mt-8 flex flex-wrap gap-2"
+            aria-label={t("dashboard.filterLabel")}
+            aria-busy={showCountSkeletons}
+          >
             {FILTERS.map((value) => (
               <Button
                 key={value}
@@ -154,6 +180,19 @@ export function TaskList({
                 className={query.status === value ? "bg-[#18213a] text-white hover:bg-[#26304b]" : "border-[#dfe4ef]"}
               >
                 {t(`dashboard.filter.${value}`)}
+                {showCountSkeletons ? (
+                  <Skeleton
+                    className={query.status === value ? "h-5 w-6 rounded-full bg-white/15" : "h-5 w-6 rounded-full bg-[#dfe4ef]"}
+                    aria-hidden
+                  />
+                ) : (
+                  <Badge
+                    variant="secondary"
+                    className={query.status === value ? "bg-white/15 text-white" : "bg-[#eef1f8] text-[#526078]"}
+                  >
+                    {pageData?.status_counts[value] ?? "—"}
+                  </Badge>
+                )}
               </Button>
             ))}
           </div>

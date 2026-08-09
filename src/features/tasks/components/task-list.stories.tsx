@@ -21,6 +21,23 @@ export const EmptyWorkspace: Story = {
   args: { initialTasks: [] },
 }
 
+export const LoadingWorkspace: Story = {
+  beforeEach: () => {
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = () => new Promise<Response>(() => {
+      // Keep the request pending so the initial loading UI can be verified.
+    })
+    return () => {
+      globalThis.fetch = originalFetch
+    }
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvasElement.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(7)
+    await expect(canvas.queryByText("0")).not.toBeInTheDocument()
+  },
+}
+
 export const WithTasks: Story = {
   args: {
     initialTasks: [
@@ -44,6 +61,13 @@ export const WithTasks: Story = {
 
     await expect(canvas.getByText("Review the launch checklist")).toBeVisible()
     await expect(canvas.getByText("Send the weekly progress note")).toBeVisible()
+    await expect(canvas.getByText("Tổng quan toàn bộ công việc")).toBeVisible()
+    await expect(canvas.getByText("Công việc đã xong")).toBeVisible()
+    await expect(canvas.getByText("Công việc chưa xong")).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Tất cả 3" })).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Đang làm 2" })).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Đã xong 1" })).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Chưa tới hạn 1" })).toBeVisible()
     await expect(canvas.getByRole("link", { name: "Thêm công việc" })).toBeVisible()
     await expect(
       canvas.getByRole("link", { name: "Chỉnh sửa công việc: Review the launch checklist" })
@@ -70,7 +94,7 @@ export const WithTasks: Story = {
     ).toBe(true)
     await userEvent.keyboard("{Escape}")
     await expect(scheduleTrigger).toHaveAttribute("data-state", "closed")
-    await expect(canvas.getByRole("button", { name: "Chưa tới hạn" })).toBeVisible()
+    await expect(canvas.getByRole("button", { name: "Chưa tới hạn 1" })).toBeVisible()
 
     await userEvent.click(canvas.getByRole("button", { name: "Đặt lại" }))
     let fromInput = canvas.getByLabelText("Đến hạn từ")

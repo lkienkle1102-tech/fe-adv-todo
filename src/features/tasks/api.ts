@@ -28,6 +28,12 @@ export type TaskPage = {
   page: number
   page_size: number
   total_pages: number
+  summary: {
+    total: number
+    completed: number
+    incomplete: number
+  }
+  status_counts: Record<TaskStatusFilter, number>
 }
 
 export async function listTasks(query: TaskQuery): Promise<TaskPage> {
